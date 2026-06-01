@@ -8,7 +8,10 @@ $sslCa    = getenv('DB_SSL_CA') ?: '';
 
 $sslOpt = [];
 if ($sslCa) {
-    $sslOpt[PDO::MYSQL_ATTR_SSL_CA] = $sslCa;
+    $sslOpt = [
+        PDO::MYSQL_ATTR_SSL_CA                => $sslCa,
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+    ];
 }
 
 $mode = $argv[1] ?? 'ping';

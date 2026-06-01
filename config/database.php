@@ -12,7 +12,8 @@ $sslCa    = getenv('DB_SSL_CA') ?: '';
 $sslOpt = [];
 if ($sslCa) {
     $sslOpt = [
-        PDO::MYSQL_ATTR_SSL_CA   => $sslCa,
+        PDO::MYSQL_ATTR_SSL_CA                => $sslCa,
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
     ];
 }
 
@@ -39,7 +40,10 @@ function createTables($pdo) {
         phone VARCHAR(20),
         role ENUM('admin', 'group_admin', 'loan_officer', 'member') DEFAULT 'member',
         group_id INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        status ENUM('active','pending') DEFAULT 'active',
+        last_login DATETIME DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_users_status (status)
     )");
     
     // Savings groups table
@@ -52,6 +56,7 @@ function createTables($pdo) {
         penalty_rate DECIMAL(5,2) DEFAULT 5.00,
         meeting_day VARCHAR(20),
         contribution_amount DECIMAL(10,2) DEFAULT 0.00,
+        invitation_code VARCHAR(6) UNIQUE,
         cycle_start_date DATE,
         cycle_end_date DATE,
         total_savings DECIMAL(15,2) DEFAULT 0.00,
@@ -210,11 +215,5 @@ function createTables($pdo) {
         $pdo->prepare("INSERT INTO users (username, password, full_name, role) VALUES ('admin', ?, 'System Administrator', 'admin')")
             ->execute([$hashedPassword]);
     }
-
-    // Schema migrations
-    try { $pdo->exec("ALTER TABLE users ADD COLUMN status ENUM('active','pending') DEFAULT 'active'"); } catch (PDOException $e) {}
-    try { $pdo->exec("ALTER TABLE savings_groups ADD COLUMN invitation_code VARCHAR(6) UNIQUE"); } catch (PDOException $e) {}
-    try { $pdo->exec("CREATE INDEX idx_users_status ON users(status)"); } catch (PDOException $e) {}
-    try { $pdo->exec("ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT NULL"); } catch (PDOException $e) {}
 }
 ?>
