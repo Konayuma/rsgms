@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(20),
     role ENUM('admin', 'group_admin', 'loan_officer', 'member') DEFAULT 'member',
     group_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status ENUM('active','pending') DEFAULT 'active',
+    last_login DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_users_status (status)
 );
 
 -- Savings groups table
@@ -33,6 +36,7 @@ CREATE TABLE IF NOT EXISTS savings_groups (
     penalty_rate DECIMAL(5,2) DEFAULT 5.00,
     meeting_day VARCHAR(20),
     contribution_amount DECIMAL(10,2) DEFAULT 0.00,
+    invitation_code VARCHAR(6) UNIQUE,
     cycle_start_date DATE,
     cycle_end_date DATE,
     total_savings DECIMAL(15,2) DEFAULT 0.00,
@@ -182,38 +186,6 @@ CREATE TABLE IF NOT EXISTS risk_mitigations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (updated_by) REFERENCES users(id)
 );
-
--- ============================================================
--- SCHEMA MIGRATIONS (idempotent ALTER TABLE statements)
--- ============================================================
-SET @s = NULL;
-SELECT 'ALTER TABLE users ADD COLUMN status ENUM(''active'',''pending'') DEFAULT ''active''',
-       'ALTER TABLE savings_groups ADD COLUMN invitation_code VARCHAR(6) UNIQUE',
-       'CREATE INDEX idx_users_status ON users(status)',
-       'ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT NULL'
-INTO @s1, @s2, @s3, @s4;
-
--- Use prepared statements to avoid errors if columns already exist
--- (MySQL 8.0+ ignores IF NOT EXISTS for columns, so we use try-catch equivalents)
-SET @sql1 = 'ALTER TABLE users ADD COLUMN status ENUM(''active'',''pending'') DEFAULT ''active''';
-PREPARE stmt FROM @sql1;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
-SET @sql2 = 'ALTER TABLE savings_groups ADD COLUMN invitation_code VARCHAR(6) UNIQUE';
-PREPARE stmt FROM @sql2;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
-SET @sql3 = 'CREATE INDEX idx_users_status ON users(status)';
-PREPARE stmt FROM @sql3;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
-SET @sql4 = 'ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT NULL';
-PREPARE stmt FROM @sql4;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
 
 -- ============================================================
 -- DEFAULT ADMIN USER
