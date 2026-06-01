@@ -4,7 +4,10 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql && \
+RUN apt-get update -qq && \
+    apt-get install -y -qq libpq-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    docker-php-ext-install pdo pdo_mysql pdo_pgsql && \
     a2enmod rewrite
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
