@@ -7,15 +7,9 @@ $port     = getenv('DB_PORT') ?: '3306';
 $dbname   = getenv('DB_NAME') ?: 'rsgms_db';
 $username = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: '';
-$sslCa    = getenv('DB_SSL_CA') ?: '';
-
-$sslOpt = [];
-if ($sslCa) {
-    $sslOpt = [
-        PDO::MYSQL_ATTR_SSL_CA                => $sslCa,
-        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-    ];
-}
+$sslOpt = [
+    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+];
 
 $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
 
