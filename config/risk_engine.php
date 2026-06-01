@@ -46,14 +46,14 @@ function getMemberRiskProfile($pdo, $member_id) {
         $active_loans_count = intval($loan_data['active_count']);
 
         // 4. Fetch overdue loan data (Disbursed status and current date exceeds the allowed repayment period)
-        $stmt = $pdo->prepare("SELECT COUNT(*) as overdue_count, COALESCE(SUM(balance), 0) as overdue_balance FROM loans WHERE member_id = ? AND status = 'disbursed' AND CURRENT_DATE() > DATE_ADD(disbursement_date, INTERVAL repayment_period MONTH)");
+        $stmt = $pdo->prepare("SELECT COUNT(*) as overdue_count, COALESCE(SUM(balance), 0) as overdue_balance FROM loans WHERE member_id = ? AND status = 'disbursed' AND CURRENT_DATE > " . sqlDateAdd($pdo, 'disbursement_date', 'repayment_period', 'MONTH'));
         $stmt->execute([$member_id]);
         $overdue_data = $stmt->fetch();
         $overdue_count = intval($overdue_data['overdue_count']);
         $overdue_balance = floatval($overdue_data['overdue_balance']);
 
         // 5. Fetch historical repayment behavior (punctuality metrics)
-        $stmt = $pdo->prepare("SELECT COUNT(*) as total_rep, SUM(CASE WHEN is_late = 1 THEN 1 ELSE 0 END) as late_rep FROM loan_repayments lr JOIN loans l ON lr.loan_id = l.id WHERE l.member_id = ?");
+        $stmt = $pdo->prepare("SELECT COUNT(*) as total_rep, SUM(CASE WHEN is_late = TRUE THEN 1 ELSE 0 END) as late_rep FROM loan_repayments lr JOIN loans l ON lr.loan_id = l.id WHERE l.member_id = ?");
         $stmt->execute([$member_id]);
         $repayment_data = $stmt->fetch();
         $total_repayments = intval($repayment_data['total_rep']);

@@ -115,7 +115,7 @@ foreach ($loans as $loan) {
 
 // Get upcoming payments (simplified - next payment due)
 $upcoming_payment = null;
-$stmt = $pdo->prepare("SELECT l.*, DATE_ADD(l.application_date, INTERVAL l.repayment_period MONTH) as due_date FROM loans l WHERE l.member_id = ? AND l.group_id = ? AND l.status = 'disbursed' ORDER BY due_date ASC LIMIT 1");
+$stmt = $pdo->prepare("SELECT l.*, " . sqlDateAdd($pdo, 'l.application_date', 'l.repayment_period', 'MONTH') . " as due_date FROM loans l WHERE l.member_id = ? AND l.group_id = ? AND l.status = 'disbursed' ORDER BY due_date ASC LIMIT 1");
 $stmt->execute([$user_id, $group_id]);
 $next_payment = $stmt->fetch();
 

@@ -30,7 +30,7 @@ if ($role == 'admin') {
     // Get PAR (Portfolio at Risk)
     $stmt = $pdo->query("SELECT COALESCE(SUM(balance), 0) as total_bal FROM loans WHERE status = 'disbursed'");
     $total_balance = $stmt->fetch()['total_bal'];
-    $stmt = $pdo->query("SELECT COALESCE(SUM(balance), 0) as overdue_bal FROM loans WHERE status = 'disbursed' AND CURRENT_DATE() > DATE_ADD(disbursement_date, INTERVAL repayment_period MONTH)");
+    $stmt = $pdo->query("SELECT COALESCE(SUM(balance), 0) as overdue_bal FROM loans WHERE status = 'disbursed' AND CURRENT_DATE > " . sqlDateAdd($pdo, 'disbursement_date', 'repayment_period', 'MONTH'));
     $overdue_balance = $stmt->fetch()['overdue_bal'];
     $stats['par_rate'] = $total_balance > 0 ? ($overdue_balance / $total_balance) * 100 : 0;
 
@@ -69,7 +69,7 @@ if ($role == 'admin') {
     $stmt = $pdo->prepare("SELECT COALESCE(SUM(balance), 0) as total_bal FROM loans WHERE group_id = ? AND status = 'disbursed'");
     $stmt->execute([$group_id]);
     $total_balance = $stmt->fetch()['total_bal'];
-    $stmt = $pdo->prepare("SELECT COALESCE(SUM(balance), 0) as overdue_bal FROM loans WHERE group_id = ? AND status = 'disbursed' AND CURRENT_DATE() > DATE_ADD(disbursement_date, INTERVAL repayment_period MONTH)");
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(balance), 0) as overdue_bal FROM loans WHERE group_id = ? AND status = 'disbursed' AND CURRENT_DATE > " . sqlDateAdd($pdo, 'disbursement_date', 'repayment_period', 'MONTH'));
     $stmt->execute([$group_id]);
     $overdue_balance = $stmt->fetch()['overdue_bal'];
     $stats['par_rate'] = $total_balance > 0 ? ($overdue_balance / $total_balance) * 100 : 0;
@@ -86,7 +86,7 @@ if ($role == 'admin') {
     $stmt->execute([$group_id]);
     $stats['total_repaid'] = $stmt->fetch()['total'];
     
-    $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM loans WHERE group_id = ? AND status = 'disbursed' AND CURRENT_DATE() > DATE_ADD(disbursement_date, INTERVAL repayment_period MONTH)");
+    $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM loans WHERE group_id = ? AND status = 'disbursed' AND CURRENT_DATE > " . sqlDateAdd($pdo, 'disbursement_date', 'repayment_period', 'MONTH'));
     $stmt->execute([$group_id]);
     $stats['overdue_loans'] = $stmt->fetch()['total'];
 } elseif ($role == 'member' && $group_id) {

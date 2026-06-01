@@ -13,7 +13,7 @@ $stmt->execute([$user_id, $group_id]);
 $savings_history = $stmt->fetchAll();
 
 // Get monthly savings summary
-$stmt = $pdo->prepare("SELECT DATE_FORMAT(contribution_date, '%Y-%m') as month, SUM(amount) as monthly_total FROM savings_contributions WHERE member_id = ? AND group_id = ? GROUP BY DATE_FORMAT(contribution_date, '%Y-%m') ORDER BY month DESC LIMIT 12");
+$stmt = $pdo->prepare("SELECT " . sqlDateFormat($pdo, 'contribution_date', '%Y-%m') . " as month, SUM(amount) as monthly_total FROM savings_contributions WHERE member_id = ? AND group_id = ? GROUP BY " . sqlDateFormat($pdo, 'contribution_date', '%Y-%m') . " ORDER BY month DESC LIMIT 12");
 $stmt->execute([$user_id, $group_id]);
 $monthly_summary = $stmt->fetchAll();
 

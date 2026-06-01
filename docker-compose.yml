@@ -1,16 +1,17 @@
 services:
   db:
-    image: mysql:8.0
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: rsgms_db
+      POSTGRES_DB: rsgms_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postpass
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./seed_test_data.sql:/docker-entrypoint-initdb.d/seed.sql
+      - pg_data:/var/lib/postgresql/data
+      - ./seed_test_data.pgsql:/docker-entrypoint-initdb.d/seed.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -20,14 +21,15 @@ services:
     ports:
       - "8080:80"
     environment:
+      DB_DRIVER: pgsql
       DB_HOST: db
-      DB_PORT: "3306"
+      DB_PORT: "5432"
       DB_NAME: rsgms_db
-      DB_USER: root
-      DB_PASSWORD: rootpass
+      DB_USER: postgres
+      DB_PASSWORD: postpass
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
-  mysql_data:
+  pg_data:

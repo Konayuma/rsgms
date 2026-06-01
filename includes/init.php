@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/validation.php';
+require_once __DIR__ . '/../config/db_helpers.php';
 
 // ── Flash messages ──────────────────────────────────────────
 function setFlash(string $type, string $message, array $opts = []): void {

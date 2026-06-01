@@ -4,6 +4,8 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: DB_DRIVER
+        value: pgsql
       - key: DB_HOST
         fromDatabase:
           name: rsgms-db
