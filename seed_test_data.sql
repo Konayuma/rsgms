@@ -1,12 +1,10 @@
 -- ============================================================
--- RSGMS Full Database Creation + Seed Test Data
--- Run via:
---   mysql -u root < seed_test_data.sql
+-- RSGMS Schema + Seed Test Data
+-- Run with your database already created:
+--   mysql -h <host> -P <port> -u <user> -p <dbname> < seed_test_data.sql
 -- ============================================================
 
-DROP DATABASE IF EXISTS rsgms_db;
-CREATE DATABASE rsgms_db;
-USE rsgms_db;
+-- Schema creation (no CREATE/DROP DATABASE — use existing DB)
 
 -- ============================================================
 -- SCHEMA

@@ -7,18 +7,21 @@ $port     = getenv('DB_PORT') ?: '3306';
 $dbname   = getenv('DB_NAME') ?: 'rsgms_db';
 $username = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: '';
+$sslCa    = getenv('DB_SSL_CA') ?: '';
 
-$dsn = "mysql:host=$host;port=$port;charset=utf8mb4";
+$sslOpt = [];
+if ($sslCa) {
+    $sslOpt = [
+        PDO::MYSQL_ATTR_SSL_CA   => $sslCa,
+    ];
+}
+
+$dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
 
 try {
-    $pdo = new PDO($dsn, $username, $password);
+    $pdo = new PDO($dsn, $username, $password, $sslOpt);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Create database if not exists
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS $dbname");
-    $pdo->exec("USE $dbname");
-    
-    // Create tables
     createTables($pdo);
     
 } catch(PDOException $e) {
