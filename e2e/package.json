@@ -1,0 +1,20 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node run.js",
+    "test:auth": "node auth.test.js",
+    "test:members": "node members.test.js",
+    "test:savings": "node savings.test.js",
+    "test:loans": "node loans.test.js",
+    "test:dashboard": "node dashboard.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}

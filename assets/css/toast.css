@@ -1,0 +1,245 @@
+:root {
+  --toast-success-bg: #ecfdf5;
+  --toast-success-border: #a7f3d0;
+  --toast-success-text: #065f46;
+  --toast-success-icon: #10b981;
+  --toast-error-bg: #fef2f2;
+  --toast-error-border: #fecaca;
+  --toast-error-text: #991b1b;
+  --toast-error-icon: #ef4444;
+  --toast-warning-bg: #fffbeb;
+  --toast-warning-border: #fde68a;
+  --toast-warning-text: #92400e;
+  --toast-warning-icon: #f59e0b;
+  --toast-info-bg: #eff6ff;
+  --toast-info-border: #bfdbfe;
+  --toast-info-text: #1e40af;
+  --toast-info-icon: #3b82f6;
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 440px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast.is-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.is-hiding {
+  transform: translateX(30%) scale(0.95);
+  opacity: 0;
+  transition: transform 0.25s ease-in, opacity 0.2s ease;
+}
+
+.toast-icon {
+  flex: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1px;
+}
+
+.toast-icon svg {
+  display: block;
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-body p {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.toast-close {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.5;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.15;
+  width: 100%;
+  transform-origin: left;
+  animation: toast-shrink linear forwards;
+}
+
+@keyframes toast-shrink {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+.toast--success {
+  background: var(--toast-success-bg);
+  border-color: var(--toast-success-border);
+  color: var(--toast-success-text);
+}
+.toast--error {
+  background: var(--toast-error-bg);
+  border-color: var(--toast-error-border);
+  color: var(--toast-error-text);
+}
+.toast--warning {
+  background: var(--toast-warning-bg);
+  border-color: var(--toast-warning-border);
+  color: var(--toast-warning-text);
+}
+.toast--info {
+  background: var(--toast-info-bg);
+  border-color: var(--toast-info-border);
+  color: var(--toast-info-text);
+}
+
+.toast--celebrate {
+  border-color: var(--toast-success-icon);
+  box-shadow: 0 0 0 1px var(--toast-success-icon), 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+.toast-checkmark {
+  animation: checkmark-draw 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: circle-draw 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.checkmark-check {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: check-draw 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+}
+
+@keyframes circle-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes checkmark-draw {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.toast-xmark circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: circle-draw 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-xmark path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: xmark-draw 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+}
+.toast-xmark path:last-child {
+  animation-delay: 0.25s;
+}
+
+@keyframes xmark-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Confetti canvas overlay */
+.confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+@media (max-width: 480px) {
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    top: 12px;
+  }
+  .toast {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+  .toast.is-hiding {
+    transform: none;
+    opacity: 0;
+  }
+  .toast-progress {
+    animation: none;
+  }
+  .toast-checkmark,
+  .checkmark-circle,
+  .checkmark-check,
+  .toast-xmark circle,
+  .toast-xmark path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .confetti-canvas {
+    display: none !important;
+  }
+}

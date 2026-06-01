@@ -1,0 +1,31 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
+
+.ui-icon,
+.nav-icon,
+.section-icon,
+.brand-icon,
+.feature-icon i,
+.stat-icon i,
+.mode-icon i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+}
+
+.brand-icon {
+    margin-right: 0.45rem;
+}
+
+.nav-icon {
+    width: 1.1rem;
+}
+
+.section-title,
+.top-bar h2,
+.form-title,
+.report-label,
+.feature-card h3,
+.feature-card p {
+    word-break: normal;
+}
