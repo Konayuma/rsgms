@@ -10,7 +10,7 @@ $mode = $argv[1] ?? 'ping';
 
 try {
     if ($driver === 'pgsql') {
-        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
         $options = [];
     } else {
         $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";

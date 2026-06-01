@@ -246,7 +246,7 @@ VALUES ('Pamodzi Savings Group', 'PAMODZI001', 'Community savings group in Ikele
         10.00, 5.00, 'Saturday', 200.00, CURRENT_DATE, group_admin_id)
 RETURNING id INTO group_id;
 
-UPDATE users SET group_id = group_id WHERE id = group_admin_id;
+UPDATE users SET group_id = (SELECT id FROM savings_groups WHERE group_code = 'PAMODZI001') WHERE username = 'gmwila';
 
 -- -------------------------------------------------------
 -- ALICE BANDA
@@ -421,7 +421,7 @@ INSERT INTO loan_repayments (loan_id, amount, principal_paid, interest_paid, pay
 -- TRANSACTIONS LOG
 -- -------------------------------------------------------
 INSERT INTO transactions (group_id, transaction_type, amount, member_id, description, created_by)
-SELECT group_id, 'savings', sc.amount, sc.member_id,
+SELECT sc.group_id, 'savings', sc.amount, sc.member_id,
        'Savings contribution of K' || sc.amount::TEXT, sc.recorded_by
 FROM savings_contributions sc;
 
@@ -434,16 +434,17 @@ INSERT INTO transactions (group_id, transaction_type, amount, member_id, loan_id
 (group_id, 'loan_disbursement', 800, frank_id, frank_loan2, 'Loan disbursement of K800', group_admin_id);
 
 INSERT INTO transactions (group_id, transaction_type, amount, loan_id, description, created_by)
-SELECT group_id, 'loan_repayment', lr.amount, lr.loan_id,
+SELECT l.group_id, 'loan_repayment', lr.amount, lr.loan_id,
        'Loan repayment of K' || lr.amount::TEXT, lr.recorded_by
-FROM loan_repayments lr;
+FROM loan_repayments lr
+JOIN loans l ON l.id = lr.loan_id;
 
 -- -------------------------------------------------------
 -- UPDATE GROUP AGGREGATES
 -- -------------------------------------------------------
 UPDATE savings_groups sg
-SET total_savings = (SELECT COALESCE(SUM(amount), 0) FROM savings_contributions WHERE group_id = sg.id),
-    total_loans   = (SELECT COALESCE(SUM(principal_amount), 0) FROM loans WHERE group_id = sg.id AND status != 'repaid')
+SET total_savings = (SELECT COALESCE(SUM(amount), 0) FROM savings_contributions WHERE savings_contributions.group_id = sg.id),
+    total_loans   = (SELECT COALESCE(SUM(principal_amount), 0) FROM loans WHERE loans.group_id = sg.id AND loans.status != 'repaid')
 WHERE sg.id = group_id;
 
 RAISE NOTICE 'SEED COMPLETE';

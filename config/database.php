@@ -8,7 +8,7 @@ $username = getenv('DB_USER') ?: ($driver === 'pgsql' ? 'postgres' : 'root');
 $password = getenv('DB_PASSWORD') ?: '';
 
 if ($driver === 'pgsql') {
-    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
     $options = [];
 } else {
     $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
