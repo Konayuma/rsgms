@@ -118,11 +118,25 @@ $sharedNavbarPreview = static function (string $text, int $limit = 82): string {
     }
     @media(max-width:768px){
         .sidebar-toggle{display:flex}
-        .shared-navbar{left:0;padding:12px 16px 0}
-        .shared-navbar-shell{flex-wrap:wrap;justify-content:stretch}
-        .shared-navbar-wrap,.shared-navbar-button{width:100%}
-        .shared-navbar-menu{width:min(92vw,340px)}
-        .shared-navbar-spacer{height:80px}
+        .shared-navbar{left:0;padding:8px 10px 0}
+        .shared-navbar-shell{flex-wrap:nowrap;justify-content:flex-end;gap:6px}
+        .shared-navbar-wrap{flex:0 1 auto;min-width:0}
+        .shared-navbar-button{width:auto;min-height:40px;padding:6px 10px;font-size:0.82rem;white-space:nowrap}
+        .shared-navbar-button .shared-navbar-copy{display:none}
+        .shared-navbar-button .shared-navbar-subtext{display:none}
+        .shared-navbar-button .fa-chevron-down{display:none}
+        .shared-navbar-bell span{display:none}
+        .shared-navbar-avatar{width:28px;height:28px;font-size:0.75rem;flex:0 0 auto}
+        .shared-navbar-menu{width:min(92vw,340px);right:-10px}
+        .shared-navbar-spacer{height:56px}
+    }
+    @media(max-width:480px){
+        .shared-navbar{padding:6px 8px 0}
+        .shared-navbar-button{padding:4px 8px;min-height:36px;gap:4px;border-radius:10px}
+        .shared-navbar-avatar{width:26px;height:26px;font-size:0.7rem}
+        .shared-navbar-badge{min-width:16px;height:16px;font-size:0.62rem;padding:0 4px}
+        .shared-navbar-spacer{height:48px}
+        .shared-navbar-menu{width:96vw;right:-8px;top:calc(100%+4px)}
     }
 </style>
 <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>

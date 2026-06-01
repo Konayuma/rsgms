@@ -125,38 +125,45 @@ $prefs = $stmt->fetch();
         }
         
         .profile-avatar {
-            width: 100px;
-            height: 100px;
-            background: #24364f;
+            width: clamp(60px,15vw,100px);
+            height: clamp(60px,15vw,100px);
+            background: var(--ink);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            color: white;
+            font-size: clamp(1.5rem,6vw,3rem);
+            color: var(--cream);
             margin: 0 auto 15px;
         }
         
         .btn-submit {
-            background: #27ae60;
-            color: white;
+            background: var(--clay);
+            color: var(--cream);
             padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             font-size: 1rem;
+            font-family:'Sora',sans-serif;
+            font-weight:500;
+            width:100%;
+            min-height:44px;
         }
         
         .btn-submit:hover {
-            background: #219a52;
+            background: var(--clay-dark);
         }
         
         .tab-buttons {
             display: flex;
             margin-bottom: 20px;
-            background: #f3f4f6;
+            background: var(--cream-light);
             border-radius: 10px;
             padding: 5px;
+            overflow-x:auto;
+            gap:4px;
+            -webkit-overflow-scrolling:touch;
         }
         
         .tab-btn {
@@ -167,10 +174,13 @@ $prefs = $stmt->fetch();
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            white-space:nowrap;
+            font-family:'Sora',sans-serif;
+            font-weight:500;
         }
         
         .tab-btn.active {
-            background: white;
+            background: var(--white-soft);
             box-shadow: 0 1px 3px rgba(15,23,42,0.08);
         }
         
@@ -180,6 +190,12 @@ $prefs = $stmt->fetch();
         
         .tab-content.active {
             display: block;
+        }
+
+        @media(max-width:480px){
+            .tab-buttons{flex-wrap:nowrap;padding:4px;gap:3px}
+            .tab-btn{font-size:0.78rem;padding:8px 6px;flex:0 1 auto}
+            .profile-header{margin-bottom:20px}
         }
     </style>
 </head>

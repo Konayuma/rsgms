@@ -69,20 +69,30 @@ if ($group_id) {
     <link rel="stylesheet" href="assets/css/design-system.css">
     <style>
         .upcoming-meeting {
-            background: #f8fafc;
-            color: #1f2937;
-            border: 1px solid #dbe3ee;
-            padding: 20px;
-            border-radius: 15px;
+            background: var(--cream);
+            color: var(--ink);
+            border: 1px solid oklch(from var(--clay) l c h / .08);
+            padding: clamp(1rem,2vw,1.5rem);
+            border-radius: var(--radius-md);
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: var(--grid-gap);
         }
         
         .meeting-date {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: clamp(1.1rem,4vw,1.5rem);
+            font-weight: 600;
+            font-family:'Fraunces',serif;
             margin-bottom: 10px;
+            font-variation-settings:'SOFT' 80;
         }
+
+        .btn-minutes {
+            padding: 6px 12px; background: var(--clay); color: var(--cream);
+            border: none; border-radius: var(--radius-sm); cursor: pointer;
+            font-family:'Sora',sans-serif; font-size:0.82rem; font-weight:500;
+            min-height:36px;
+        }
+        .btn-minutes:hover{background:var(--clay-dark)}
     </style>
 </head>
 <body>
@@ -186,7 +196,7 @@ if ($group_id) {
                                 <td><?php echo $meeting['loans_disbursed'] ? 'K ' . number_format($meeting['loans_disbursed'], 2) : '-'; ?></td>
                                 <td><?php echo $meeting['loans_repaid'] ? 'K ' . number_format($meeting['loans_repaid'], 2) : '-'; ?></td>
                                 <td>
-                                    <button onclick="viewMinutes('<?php echo htmlspecialchars($meeting['minutes'] ?? 'No minutes recorded'); ?>')" style="padding: 5px 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">View Minutes</button>
+                                    <button class="btn-minutes" onclick="viewMinutes('<?php echo htmlspecialchars($meeting['minutes'] ?? 'No minutes recorded'); ?>')">View Minutes</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
