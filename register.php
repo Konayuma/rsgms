@@ -7,6 +7,18 @@ $message = '';
 $error = '';
 $formData = [];
 
+// Detect logged-in member without a group
+$is_logged_in = false;
+$logged_user = null;
+if (isset($_SESSION['user_id'])) {
+    $stmt = $pdo->prepare("SELECT id, full_name, username, email, phone, role, group_id FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $logged_user = $stmt->fetch();
+    if ($logged_user && $logged_user['role'] === 'member' && empty($logged_user['group_id'])) {
+        $is_logged_in = true;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = Validation::sanitizeArray($_POST);
     $group_name        = $formData['group_name'] ?? '';
@@ -22,14 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin_phone       = $formData['admin_phone'] ?? '';
 
     $valid = true;
-    if (!Validation::required($_POST, ['group_name', 'admin_username', 'admin_password', 'admin_full_name'])) $valid = false;
-    if (!Validation::fullName($admin_full_name)) $valid = false;
-    if (!Validation::username($admin_username)) $valid = false;
-    if (!Validation::uniqueUsername($pdo, $admin_username)) $valid = false;
-    if (!Validation::email($admin_email)) $valid = false;
-    if ($admin_email !== '' && !Validation::uniqueEmail($pdo, $admin_email)) $valid = false;
-    if (!Validation::phone($admin_phone)) $valid = false;
-    if (!Validation::password($admin_password, 8)) $valid = false;
+    if (!Validation::required($_POST, ['group_name'])) $valid = false;
+    if (!$is_logged_in) {
+        if (!Validation::required($_POST, ['admin_username', 'admin_password', 'admin_full_name'])) $valid = false;
+        if (!Validation::fullName($admin_full_name)) $valid = false;
+        if (!Validation::username($admin_username)) $valid = false;
+        if (!Validation::uniqueUsername($pdo, $admin_username)) $valid = false;
+        if (!Validation::email($admin_email)) $valid = false;
+        if ($admin_email !== '' && !Validation::uniqueEmail($pdo, $admin_email)) $valid = false;
+        if (!Validation::phone($admin_phone)) $valid = false;
+        if (!Validation::password($admin_password, 8)) $valid = false;
+    }
     if (!Validation::positiveNumber($interest_rate, 'Interest rate')) $valid = false;
     if (!Validation::positiveNumber($penalty_rate, 'Penalty rate')) $valid = false;
     if (!Validation::positiveNumber($contribution_amount, 'Contribution amount')) $valid = false;
@@ -52,13 +67,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
             $stmt = $pdo->prepare("INSERT INTO savings_groups (group_name, group_code, invitation_code, description, interest_rate, penalty_rate, meeting_day, contribution_amount, cycle_start_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([$group_name, $group_code, $invitation_code, $description, $interest_rate, $penalty_rate, $meeting_day, $contribution_amount, date('Y-m-d')]);
-            $group_id = $pdo->lastInsertId();
+            $new_group_id = $pdo->lastInsertId();
 
-            $hashed = password_hash($admin_password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, email, phone, role, group_id) VALUES (?, ?, ?, ?, ?, 'group_admin', ?)");
-            $stmt->execute([$admin_username, $hashed, $admin_full_name, $admin_email, $admin_phone, $group_id]);
+            if ($is_logged_in) {
+                $stmt = $pdo->prepare("UPDATE users SET role = 'group_admin', group_id = ? WHERE id = ?");
+                $stmt->execute([$new_group_id, $logged_user['id']]);
+            } else {
+                $hashed = password_hash($admin_password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, email, phone, role, group_id) VALUES (?, ?, ?, ?, ?, 'group_admin', ?)");
+                $stmt->execute([$admin_username, $hashed, $admin_full_name, $admin_email, $admin_phone, $new_group_id]);
+            }
 
             $pdo->commit();
+
+            if ($is_logged_in) {
+                $_SESSION['role'] = 'group_admin';
+                $_SESSION['group_id'] = $new_group_id;
+                $_SESSION['status'] = 'active';
+                header('Location: dashboard.php');
+                exit();
+            }
+
             $message = "Group registered successfully! Your group code is <strong>{$group_code}</strong> and invitation code is <strong>{$invitation_code}</strong>. Share the invitation code with members so they can join.";
             $_POST = [];
             $formData = [];
@@ -75,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register Group — RSGMS</title>
+<title><?php echo $is_logged_in ? 'Create Group' : 'Register Group'; ?> — RSGMS</title>
 <link rel="stylesheet" href="assets/css/icons.css">
 <link rel="stylesheet" href="assets/css/design-system.css">
 <style>
@@ -101,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="auth-page">
     <h1>RSGMS</h1>
-    <p class="sub">Register your savings group</p>
+    <p class="sub"><?php echo $is_logged_in ? 'Create a savings group from your account' : 'Register your savings group'; ?></p>
 
     <div class="register-form">
         <?php if ($message): ?>
@@ -143,6 +172,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
+            <?php if ($is_logged_in): ?>
+            <div style="background:var(--cream);border:1px solid oklch(from var(--clay) l c h / .12);border-radius:12px;padding:16px;margin:1rem 0;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--clay);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0;"><?php echo strtoupper(substr($logged_user['full_name'], 0, 1)); ?></div>
+                    <div>
+                        <div style="font-weight:600;color:var(--ink);font-size:0.95rem;"><?php echo htmlspecialchars($logged_user['full_name']); ?></div>
+                        <div style="font-size:0.8rem;color:var(--ink-soft);">You will become the group administrator for this savings group.</div>
+                    </div>
+                </div>
+            </div>
+            <?php else: ?>
             <h2>Administrator account</h2>
             <div class="form-group">
                 <label>Full name *</label>
@@ -168,10 +208,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="tel" name="admin_phone" value="<?php echo htmlspecialchars($formData['admin_phone'] ?? $_POST['admin_phone'] ?? ''); ?>">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Register group</button>
+            <?php endif; ?>
+            <button type="submit" class="btn btn-primary"><?php echo $is_logged_in ? 'Create group &amp; become admin' : 'Register group'; ?></button>
         </form>
 
+        <?php if ($is_logged_in): ?>
+        <a href="dashboard.php" class="auth-back">← Back to dashboard</a>
+        <?php else: ?>
         <a href="index.php" class="auth-back">← Back to home</a>
+        <?php endif; ?>
     </div>
 <script src="assets/js/loading.js"></script>
 </body>

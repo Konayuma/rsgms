@@ -12,7 +12,7 @@ $status = $_SESSION['status'] ?? 'active';
         <a href="dashboard.php" class="<?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>">
             <i class="fa-solid fa-chart-column nav-icon"></i><span class="nav-label"> Dashboard</span>
         </a>
-        <?php if ($status === 'pending'): ?>
+        <?php if ($status === 'pending' || ($role === 'member' && empty($_SESSION['group_id']))): ?>
             <a href="notifications.php" class="<?php echo $current_page == 'notifications.php' ? 'active' : ''; ?>">
                 <i class="fa-solid fa-bell nav-icon"></i><span class="nav-label"> Notifications</span>
             </a>

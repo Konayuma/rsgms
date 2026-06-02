@@ -4,12 +4,6 @@ $role = $user['role'];
 $group_id = intval($user['group_id'] ?? 0);
 $user_status = $user['status'] ?? 'active';
 
-// Redirect member without group to join page
-if (empty($user['group_id']) && $role === 'member') {
-    header('Location: join_group.php');
-    exit();
-}
-
 // Get dashboard statistics based on role
 $stats = [];
 
@@ -372,7 +366,24 @@ if ($role == 'admin') {
                     <div class="stat-number"><?php echo number_format($stats['overdue_loans']); ?></div>
                     <div class="stat-footnote">Loans past their scheduled repayment date.</div>
                 </div>
-            <?php elseif ($role == 'member'): ?>
+            <?php elseif ($role == 'member' && empty($group_id)): ?>
+                <div class="stat-card" style="--accent: #2563eb; grid-column: 1 / -1;">
+                    <div class="stat-card-head">
+                        <div class="stat-info">
+                            <div class="stat-kicker">Welcome</div>
+                            <h3>You're not in a savings group yet</h3>
+                        </div>
+                        <div class="stat-icon"><i class="fa-solid fa-hand"></i></div>
+                    </div>
+                    <div class="stat-number" style="font-size: 1rem;">
+                        Join an existing group with an invitation code, or create a new group and become its administrator.
+                    </div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
+                        <a href="join_group.php" class="btn btn-primary" style="text-decoration:none;padding:12px 24px;display:inline-flex;align-items:center;gap:8px;"><i class="fa-solid fa-key"></i> Join a savings group</a>
+                        <a href="register.php" class="btn btn-primary" style="text-decoration:none;padding:12px 24px;display:inline-flex;align-items:center;gap:8px;background:var(--clay-light);"><i class="fa-solid fa-plus"></i> Register a new group</a>
+                    </div>
+                </div>
+            <?php elseif ($role == 'member' && $group_id): ?>
                 <div class="stat-card" style="--accent: #2563eb;">
                     <div class="stat-card-head">
                         <div class="stat-info">
