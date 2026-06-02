@@ -159,44 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php echo htmlspecialchars($members[0]['full_name'] ?? 'You'); ?>
                     </div>
                 </div>
-
-                <!-- Dynamic Capacity Risk Profiling Card Container -->
-                <div id="riskProfileCard" style="display: none; margin-bottom: 25px; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; background: #ffffff; color: #1f2937; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                        <div>
-                            <h4 style="font-size: 1.05rem; margin-bottom: 4px; color: #1f2937;" id="riskMemberName">Jane Doe</h4>
-                            <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;" id="riskGroupName">Pamodzi Savings Group</p>
-                        </div>
-                        <span id="riskGradeBadge" style="display: inline-block; padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; border: 1px solid;">GRADE A</span>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e5e7eb; margin-bottom: 15px;">
-                        <div>
-                            <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">Historical Savings</span>
-                            <strong style="font-size: 1rem; color: #1f2937;" id="riskHistSavings">K 0.00</strong>
-                        </div>
-                        <div>
-                            <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">Outstanding Loans</span>
-                            <strong style="font-size: 1rem; color: #f87171;" id="riskOutDebt">K 0.00</strong>
-                        </div>
-                        <div>
-                            <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">Net Collateral Equity</span>
-                            <strong style="font-size: 1rem; color: #34d399;" id="riskNetEquity">K 0.00</strong>
-                        </div>
-                        <div>
-                            <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">Repayment Compliance</span>
-                            <strong style="font-size: 1rem; color: #fbbf24;" id="riskLateReps">0 / 0</strong>
-                        </div>
-                    </div>
-                    
-                    <div style="border-top: 1px solid #e5e7eb; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <span style="display: block; font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">Capacity-Driven Eligibility Ceiling</span>
-                            <span style="font-size: 1.15rem; font-weight: 800; color: #60a5fa;" id="riskSafeLimit">K 0.00</span>
-                        </div>
-                            <p style="font-size: 0.8rem; font-style: italic; color: #64748b; max-width: 100%; flex: 1 1 200px; text-align: right; margin-top: 2px;" id="riskDescription">Consistent savings record, reliable profile.</p>
-                    </div>
-                </div>
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -284,9 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Dynamic Capacity Risk Profiling AJAX Integration
         const riskCard = document.getElementById('riskProfileCard');
+        const riskCardInner = riskCard.querySelector('.risk-profile-inner');
         const submitBtn = document.querySelector('.btn-submit');
         let currentSafeLimit = 0;
-        const currentMemberId = <?php echo $user_id; ?>;
+        let currentMemberId = <?php echo $user_id; ?>;
 
         function fetchRiskProfile(memberId) {
             if (!memberId) {
@@ -297,10 +260,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
 
+            // Show loading state
+            riskCard.style.display = 'block';
+            riskCardInner.style.display = 'none';
+            Loading.showSpinner(riskCard, 'Loading risk profile\u2026');
+
             fetch(`get_member_risk_profile.php?member_id=${memberId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Server returned ' + response.status);
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
+                        Loading.hideSpinner(riskCard);
+                        riskCardInner.style.display = '';
+
                         const p = data.profile;
                         const derivedLimit = parseFloat(p.eligible_amount ?? p.safe_limit ?? 0);
                         currentSafeLimit = isNaN(derivedLimit) ? 0 : derivedLimit;
@@ -322,24 +296,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         badge.textContent = `GRADE ${p.risk_grade} | SCORE ${score}`;
                         badge.style.borderColor = p.risk_color;
                         badge.style.color = p.risk_color;
-                        badge.style.background = `${p.risk_color}1a`; // 10% opacity
+                        badge.style.background = `${p.risk_color}1a`;
                         
                         document.getElementById('riskSafeLimit').textContent = 'K ' + currentSafeLimit.toFixed(2);
                         document.getElementById('riskDescription').textContent = `${p.risk_label}. ${p.description}`;
                         
-                        // Set standard validation bounds
                         document.getElementById('principal').max = currentSafeLimit;
                         
-                        riskCard.style.display = 'block';
                         validateAmount();
                     } else {
-                        riskCard.style.display = 'none';
-                        console.error(data.error);
+                        Loading.errorState(riskCard, {
+                            message: 'Could not load risk profile',
+                            detail: data.error || 'Unknown error',
+                            onRetry: function () { fetchRiskProfile(memberId); }
+                        });
+                        currentSafeLimit = 0;
+                        document.getElementById('principal').removeAttribute('max');
+                        validateAmount();
                     }
                 })
                 .catch(err => {
-                    riskCard.style.display = 'none';
-                    console.error("Failed to load risk profile", err);
+                    Loading.errorState(riskCard, {
+                        message: 'Failed to load risk profile',
+                        detail: 'Network error. Please check your connection.',
+                        onRetry: function () { fetchRiskProfile(memberId); }
+                    });
+                    currentSafeLimit = 0;
+                    document.getElementById('principal').removeAttribute('max');
+                    validateAmount();
                 });
         }
 
@@ -381,6 +365,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Calculate on page load if values exist
         calculateLoan();
     </script>
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/toast.js"></script>
 </body>
 </html>

@@ -212,5 +212,6 @@ footer{
   <div class="footer-bottom">© 2026 RSGMS — Zambia University College of Technology</div>
 </footer>
 
+<script src="assets/js/loading.js"></script>
 </body>
 </html>

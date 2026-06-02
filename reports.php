@@ -255,7 +255,8 @@ if (isset($_GET['export'])) {
                         }
                         $savings_report = $stmt->fetchAll();
                         
-                        foreach ($savings_report as $report):
+                        if (count($savings_report) > 0):
+                            foreach ($savings_report as $report):
                         ?>
                         <tr>
                             <td><?php echo htmlspecialchars($report['full_name']); ?></td>
@@ -263,7 +264,12 @@ if (isset($_GET['export'])) {
                             <td><?php echo $report['last_contribution'] ? date('d/m/Y', strtotime($report['last_contribution'])) : 'Never'; ?></td>
                             <td><?php echo $report['contribution_count']; ?></td>
                         </tr>
-                        <?php endforeach; ?>
+                        <?php
+                            endforeach;
+                        else:
+                        ?>
+                        <tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-sack-dollar"></i></div><div class="empty-state-title">No savings data</div><div class="empty-state-text">Members haven't recorded any savings contributions yet.</div></div></td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -294,7 +300,8 @@ if (isset($_GET['export'])) {
                         }
                         $loans_report = $stmt->fetchAll();
                         
-                        foreach ($loans_report as $loan):
+                        if (count($loans_report) > 0):
+                            foreach ($loans_report as $loan):
                         ?>
                         <tr>
                             <td><?php echo htmlspecialchars($loan['full_name']); ?></td>
@@ -303,7 +310,12 @@ if (isset($_GET['export'])) {
                             <td><?php echo date('d/m/Y', strtotime($loan['application_date'])); ?></td>
                             <td><?php echo $loan['disbursement_date'] ? date('d/m/Y', strtotime($loan['disbursement_date'])) : '-'; ?></td>
                         </tr>
-                        <?php endforeach; ?>
+                        <?php
+                            endforeach;
+                        else:
+                        ?>
+                        <tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-chart-line"></i></div><div class="empty-state-title">No loan data</div><div class="empty-state-text">No loans have been issued yet in this scope.</div></div></td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -319,5 +331,6 @@ if (isset($_GET['export'])) {
             </div>
         </div>
     </div>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>

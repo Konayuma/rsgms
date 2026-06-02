@@ -171,7 +171,7 @@ $sharedNavbarPreview = static function (string $text, int $limit = 82): string {
                         </a>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <div class="shared-navbar-empty">No notifications yet.</div>
+                        <div class="empty-state" style="padding:16px 12px"><div class="empty-state-title" style="font-size:.85rem">No notifications yet</div></div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -229,10 +229,12 @@ document.addEventListener('DOMContentLoaded',function(){
     var unreadBadge=document.querySelector('.shared-navbar-badge');
     var unreadSub=document.querySelector('.shared-navbar-subtitle');
     var dropLinks=document.querySelector('#sharedNotificationsMenu .shared-navbar-section');
-    function pollUnread(){var r=new XMLHttpRequest();r.open('GET','ajax/unread_count.php?_='+Date.now(),true);r.onload=function(){if(r.status!==200)return;try{var d=JSON.parse(r.responseText);var c=d.unread||0;if(unreadBadge){unreadBadge.textContent=c;unreadBadge.style.display=c>0?'inline-flex':'none'}if(unreadSub)unreadSub.textContent=c+' unread'}catch(_){}};r.send()}
-    function pollNotifications(){var r=new XMLHttpRequest();r.open('GET','ajax/recent_notifications.php?_='+Date.now(),true);r.onload=function(){if(r.status!==200||!dropLinks)return;try{var d=JSON.parse(r.responseText);var items=d.notifications||[];var html='';if(items.length>0){items.forEach(function(n){var dot=n.is_read?'is-read':'';html+='<a class="shared-navbar-link" href="notifications.php"><span class="shared-navbar-dot '+dot+'"></span><span><strong>'+esc(n.title)+'</strong><span>'+esc(n.preview)+'</span></span></a>'})}else{html='<div class="shared-navbar-empty">No notifications yet.</div>'}dropLinks.innerHTML=html}catch(_){}};r.send()}
+    var pollFailCount=0;
+    function pollUnread(){var r=new XMLHttpRequest();r.open('GET','ajax/unread_count.php?_='+Date.now(),true);r.onload=function(){if(r.status!==200){pollFailCount++;return}pollFailCount=0;try{var d=JSON.parse(r.responseText);var c=d.unread||0;if(unreadBadge){unreadBadge.textContent=c;unreadBadge.style.display=c>0?'inline-flex':'none'}if(unreadSub)unreadSub.textContent=c+' unread'}catch(_){}};r.onerror=function(){pollFailCount++};r.send()}
+    function pollNotifications(){var r=new XMLHttpRequest();r.open('GET','ajax/recent_notifications.php?_='+Date.now(),true);r.onload=function(){if(r.status!==200||!dropLinks){pollFailCount++;return}pollFailCount=0;try{var d=JSON.parse(r.responseText);var items=d.notifications||[];var html='';if(items.length>0){items.forEach(function(n){var dot=n.is_read?'is-read':'';html+='<a class="shared-navbar-link" href="notifications.php"><span class="shared-navbar-dot '+dot+'"></span><span><strong>'+esc(n.title)+'</strong><span>'+esc(n.preview)+'</span></span></a>'})}else{html='<div class="empty-state" style="padding:16px 12px"><div class="empty-state-title" style="font-size:.85rem">No notifications yet</div></div>'}dropLinks.innerHTML=html}catch(_){}};r.onerror=function(){pollFailCount++};r.send()}
     function esc(s){var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML}
-    setInterval(pollUnread,30000);setInterval(pollNotifications,60000);
+    function getPollInterval(base){var backoff=pollFailCount>0?Math.min(pollFailCount,4):0;return base*(backoff+1)}
+    setInterval(function(){pollUnread()},getPollInterval(30000));setInterval(function(){pollNotifications()},getPollInterval(60000));
 });
 
 // sidebar toggle (mobile)

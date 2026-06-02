@@ -2,9 +2,6 @@
 $user_id = $user['id'];
 $role = $user['role'];
 $group_id = intval($user['group_id'] ?? 0);
-$message = '';
-$error = '';
-
 // Get savings history
 if ($role == 'admin') {
     $stmt = $pdo->prepare("SELECT sc.*, u.full_name as member_name, sg.group_name FROM savings_contributions sc JOIN users u ON sc.member_id = u.id LEFT JOIN savings_groups sg ON sc.group_id = sg.id ORDER BY sc.created_at DESC LIMIT 50");
@@ -55,14 +52,6 @@ $savings_summary = $stmt->fetchAll();
             <h2>Savings Management</h2>
         </div>
         
-        <?php if ($message): ?>
-            <div class="message"><?php echo htmlspecialchars($message); ?></div>
-        <?php endif; ?>
-        
-        <?php if ($error): ?>
-            <div class="error"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
-        
         <!-- Savings Summary by Member -->
         <div class="section">
             <div class="section-title"><i class="fa-solid fa-chart-column section-icon"></i> Savings Summary by Member</div>
@@ -86,7 +75,7 @@ $savings_summary = $stmt->fetchAll();
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="3" style="text-align: center;">No savings records found</td>
+                                        <td colspan="3"><div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-sack-dollar"></i></div><div class="empty-state-title">No savings records</div><div class="empty-state-text">Members haven't recorded any savings yet.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -181,7 +170,7 @@ $savings_summary = $stmt->fetchAll();
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="5" style="text-align: center;">No savings history found</td>
+                                        <td colspan="5"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-clock"></i></div><div class="empty-state-title">No savings history</div><div class="empty-state-text">Recent savings activity will appear here.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -190,5 +179,6 @@ $savings_summary = $stmt->fetchAll();
         </div>
     </div>
     <script src="assets/js/chart.umd.min.js"></script>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>

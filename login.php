@@ -114,5 +114,6 @@ document.getElementById('loginForm')?.addEventListener('submit', function(e){
     if(!u||!p){e.preventDefault();alert('Please fill in all fields.')}
 });
 </script>
+<script src="assets/js/loading.js"></script>
 </body>
 </html>

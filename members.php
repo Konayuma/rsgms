@@ -273,7 +273,7 @@ if ($role == 'admin') {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="8" style="text-align: center; padding: 30px 12px;"><i class="fa-regular fa-users" style="font-size:1.3rem;margin-right:6px;"></i> No members yet — invite someone to join your group!</td>
+                                <td colspan="8"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-users"></i></div><div class="empty-state-title">No members yet</div><div class="empty-state-text">Invite someone to join your group using the invitation code.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -445,6 +445,7 @@ if ($role == 'admin') {
         }
     </script>
     <link rel="stylesheet" href="assets/css/toast.css">
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/toast.js"></script>
 </body>
 </html>

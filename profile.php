@@ -342,6 +342,7 @@ $prefs = $stmt->fetch();
         }
     </script>
     <link rel="stylesheet" href="assets/css/toast.css">
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/toast.js"></script>
 </body>
 </html>

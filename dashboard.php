@@ -587,7 +587,7 @@ if ($role == 'admin') {
                         else:
                         ?>
                         <tr>
-                            <td colspan="5" style="text-align: center;">No transactions found</td>
+                            <td colspan="5"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-receipt"></i></div><div class="empty-state-title">No transactions yet</div><div class="empty-state-text">Transactions will appear here once you start saving or taking loans.</div></div></td>
                         </tr>
                         <?php endif; ?>
                     </tbody>
@@ -634,5 +634,6 @@ document.querySelectorAll('.copy-btn').forEach(function(btn) {
     });
 });
 </script>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>

@@ -173,5 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <a href="index.php" class="auth-back">← Back to home</a>
     </div>
+<script src="assets/js/loading.js"></script>
 </body>
 </html>

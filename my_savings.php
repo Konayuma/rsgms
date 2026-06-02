@@ -244,10 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     });
                     </script>
                 <?php else: ?>
-                    <div class="chart-empty">
-                        <i class="fa-solid fa-chart-column"></i>
-                        <p>No savings data yet. Start contributing to see your monthly summary!</p>
-                    </div>
+                    <div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-chart-column"></i></div><div class="empty-state-title">No savings data yet</div><div class="empty-state-text">Start contributing to see your monthly savings summary.</div></div>
                 <?php endif; ?>
             </div>
         </div>
@@ -277,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 30px 12px;"><i class="fa-solid fa-piggy-bank" style="font-size:1.3rem;margin-right:6px;"></i> Start your savings journey — every contribution counts!</td>
+                                <td colspan="4"><div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-piggy-bank"></i></div><div class="empty-state-title">Start your savings journey</div><div class="empty-state-text">Every contribution counts! Record your first savings above.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -298,6 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/toast.js"></script>
 </body>
 </html>

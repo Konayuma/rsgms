@@ -1,20 +1,27 @@
 <?php require_once 'includes/init.php'; $user = requireRole(['member']);
 $user_id = $user['id'];
 $group_id = $user['group_id'];
+$query_error = '';
 
 // Get statement data
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
 $end_date = $_GET['end_date'] ?? date('Y-m-t');
 
-// Get savings transactions
-$stmt = $pdo->prepare("SELECT sc.*, 'savings' as type FROM savings_contributions sc WHERE sc.member_id = ? AND sc.group_id = ? AND sc.contribution_date BETWEEN ? AND ? ORDER BY sc.contribution_date");
-$stmt->execute([$user_id, $group_id, $start_date, $end_date]);
-$savings_transactions = $stmt->fetchAll();
+try {
+    // Get savings transactions
+    $stmt = $pdo->prepare("SELECT sc.*, 'savings' as type FROM savings_contributions sc WHERE sc.member_id = ? AND sc.group_id = ? AND sc.contribution_date BETWEEN ? AND ? ORDER BY sc.contribution_date");
+    $stmt->execute([$user_id, $group_id, $start_date, $end_date]);
+    $savings_transactions = $stmt->fetchAll();
 
-// Get loan transactions
-$stmt = $pdo->prepare("SELECT lr.*, l.principal_amount, 'loan_repayment' as type FROM loan_repayments lr JOIN loans l ON lr.loan_id = l.id WHERE l.member_id = ? AND l.group_id = ? AND lr.payment_date BETWEEN ? AND ? ORDER BY lr.payment_date");
-$stmt->execute([$user_id, $group_id, $start_date, $end_date]);
-$loan_transactions = $stmt->fetchAll();
+    // Get loan transactions
+    $stmt = $pdo->prepare("SELECT lr.*, l.principal_amount, 'loan_repayment' as type FROM loan_repayments lr JOIN loans l ON lr.loan_id = l.id WHERE l.member_id = ? AND l.group_id = ? AND lr.payment_date BETWEEN ? AND ? ORDER BY lr.payment_date");
+    $stmt->execute([$user_id, $group_id, $start_date, $end_date]);
+    $loan_transactions = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $query_error = 'Could not load statement data. Please try again.';
+    $savings_transactions = [];
+    $loan_transactions = [];
+}
 
 // Combine all transactions
 $all_transactions = [];
@@ -171,6 +178,10 @@ foreach ($all_transactions as $trans) {
             </div>
         </div>
         
+        <?php if ($query_error): ?>
+        <div class="flash-message error"><?php echo htmlspecialchars($query_error); ?></div>
+        <?php endif; ?>
+        
         <!-- Statement Header -->
         <div class="statement-header">
             <h1>Rural Savings Group Management System</h1>
@@ -240,7 +251,7 @@ foreach ($all_transactions as $trans) {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="5" style="text-align: center;">No transactions found for the selected period</td>
+                                <td colspan="5"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-receipt"></i></div><div class="empty-state-title">No transactions found</div><div class="empty-state-text">Try adjusting your date range or recording a transaction first.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -266,5 +277,6 @@ foreach ($all_transactions as $trans) {
             });
         });
     </script>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>

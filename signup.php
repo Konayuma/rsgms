@@ -144,5 +144,6 @@ document.getElementById('password')?.addEventListener('input',function(){
     bar.style.background=s<=1?'var(--danger)':s<=2?'var(--gold)':s<=3?'var(--clay-light)':'var(--success)';
 });
 </script>
+<script src="assets/js/loading.js"></script>
 </body>
 </html>

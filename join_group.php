@@ -116,5 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
 document.getElementById('code')?.addEventListener('input',function(){this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)});
 </script>
+<script src="assets/js/loading.js"></script>
 </body>
 </html>

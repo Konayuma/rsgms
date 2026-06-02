@@ -200,6 +200,7 @@ $active_loans = (float) $stmt->fetchColumn();
             </div>
         </div>
     </div>
+<script src="assets/js/loading.js"></script>
 <script src="assets/js/toast.js"></script>
 </body>
 </html>

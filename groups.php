@@ -267,6 +267,7 @@ document.querySelectorAll('[data-toggle]').forEach(function(header) {
     });
 });
 </script>
+<script src="assets/js/loading.js"></script>
 <script src="assets/js/toast.js"></script>
 </body>
 </html>

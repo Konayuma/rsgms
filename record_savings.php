@@ -212,5 +212,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="my_savings.php" class="back-link">← Back to My Savings</a>
         </div>
     </div>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>

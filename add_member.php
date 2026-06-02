@@ -177,5 +177,6 @@ if ($role == 'admin') {
             <a href="members.php" class="back-link">← Back to Members</a>
         </div>
     </div>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>

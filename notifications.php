@@ -670,7 +670,7 @@ if ($role == 'admin' || $role == 'group_admin') {
                             </a>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <div class="alert-empty">No notifications yet. New alerts will appear here first.</div>
+                            <div class="empty-state" style="padding:20px 16px"><div class="empty-state-icon" style="width:40px;height:40px;font-size:.95rem;margin-bottom:8px"><i class="fa-regular fa-bell"></i></div><div class="empty-state-title" style="font-size:.9rem">No notifications yet</div><div class="empty-state-text">New alerts will appear here first.</div></div>
                         <?php endif; ?>
                     </div>
             </div>
@@ -760,10 +760,7 @@ if ($role == 'admin' || $role == 'group_admin') {
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="no-notifications">
-                    <h3>No notifications yet</h3>
-                    <p>You'll receive notifications about important updates, meeting reminders, and payment due dates.</p>
-                </div>
+                <div class="empty-state" style="padding:60px 20px"><div class="empty-state-icon empty-state-icon-lg"><i class="fa-regular fa-bell"></i></div><div class="empty-state-title">No notifications yet</div><div class="empty-state-text">You'll receive notifications about important updates, meeting reminders, and payment due dates.</div></div>
             <?php endif; ?>
         </div>
     </div>
@@ -844,5 +841,6 @@ if ($role == 'admin' || $role == 'group_admin') {
     });
 </script>
 <link rel="stylesheet" href="assets/css/toast.css">
+<script src="assets/js/loading.js"></script>
 <script src="assets/js/toast.js"></script>
 </html>

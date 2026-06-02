@@ -298,7 +298,7 @@ if ($next_payment) {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 30px 12px;"><i class="fa-regular fa-seedling" style="font-size:1.3rem;margin-right:6px;"></i> No loans yet — start by applying for one above!</td>
+                                <td colspan="7"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-seedling"></i></div><div class="empty-state-title">No loans yet</div><div class="empty-state-text">Apply for a loan above to get started on your financial journey.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -353,7 +353,7 @@ if ($next_payment) {
                         else:
                         ?>
                         <tr>
-                            <td colspan="6" style="text-align: center;">No repayment history found</td>
+                            <td colspan="6"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-clock"></i></div><div class="empty-state-title">No repayment history</div><div class="empty-state-text">Your repayment records will appear here once you make a payment.</div></div></td>
                         </tr>
                         <?php endif; ?>
                     </tbody>
@@ -553,6 +553,7 @@ if ($next_payment) {
         }
     </script>
     <link rel="stylesheet" href="assets/css/toast.css">
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/toast.js"></script>
 </body>
 </html>

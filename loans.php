@@ -338,7 +338,7 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 30px 12px;"><i class="fa-regular fa-lightbulb" style="font-size:1.3rem;margin-right:6px;"></i> No loans yet — ready to help a member grow?</td>
+                                <td colspan="7"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-lightbulb"></i></div><div class="empty-state-title">No loans yet</div><div class="empty-state-text">Ready to help a member grow? Loans will appear here once members apply.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -458,19 +458,22 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
             document.getElementById('repay_amount').max = loan.balance;
 
             const memberId = loan.member_id;
+            const walletEl = document.getElementById('repay_wallet');
             if (walletCache[memberId] !== undefined) {
-                document.getElementById('repay_wallet').textContent = 'K ' + walletCache[memberId].toFixed(2);
+                walletEl.innerHTML = 'K ' + walletCache[memberId].toFixed(2);
             } else {
-                document.getElementById('repay_wallet').textContent = 'Loading...';
+                walletEl.innerHTML = '<span class="loading-spinner loading-spinner-sm" style="margin-right:6px"></span> <span style="font-size:0.82rem;color:#64748b;">Loading...</span>';
                 fetch('get_member_savings.php?member_id=' + memberId + '&group_id=' + loan.group_id)
                     .then(r => r.json())
                     .then(data => {
+                        if (data.success === false) throw new Error(data.error || 'Failed to load');
                         const bal = parseFloat(data.balance) || 0;
                         walletCache[memberId] = bal;
-                        document.getElementById('repay_wallet').textContent = 'K ' + bal.toFixed(2);
+                        walletEl.innerHTML = 'K ' + bal.toFixed(2);
                     })
                     .catch(() => {
-                        document.getElementById('repay_wallet').textContent = 'K 0.00';
+                        walletEl.innerHTML = '<span style="font-size:0.82rem;color:#ef4444;">Could not load</span>';
+                        if (Toast) Toast.show('Could not load savings balance', 'warning');
                     });
             }
             document.getElementById('repay_method').value = 'cash';
@@ -508,6 +511,7 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
         }
     </script>
     <link rel="stylesheet" href="assets/css/toast.css">
+    <script src="assets/js/loading.js"></script>
     <script src="assets/js/toast.js"></script>
 </body>
 </html>

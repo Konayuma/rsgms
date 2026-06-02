@@ -202,7 +202,7 @@ if ($group_id) {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="7" style="text-align: center;">No meetings recorded yet</td>
+                                <td colspan="7"><div class="empty-state"><div class="empty-state-icon"><i class="fa-regular fa-calendar"></i></div><div class="empty-state-title">No meetings recorded</div><div class="empty-state-text">Record your first meeting using the form above.</div></div></td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -216,5 +216,6 @@ if ($group_id) {
             alert('Meeting Minutes:\n\n' + minutes);
         }
     </script>
+    <script src="assets/js/loading.js"></script>
 </body>
 </html>
