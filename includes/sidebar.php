@@ -79,6 +79,9 @@ $status = $_SESSION['status'] ?? 'active';
             <a href="statements.php" class="<?php echo $current_page == 'statements.php' ? 'active' : ''; ?>">
                 <i class="fa-solid fa-file-contract nav-icon"></i><span class="nav-label"> Statements</span>
             </a>
+            <a href="meeting_minutes.php" class="<?php echo $current_page == 'meeting_minutes.php' ? 'active' : ''; ?>">
+                <i class="fa-solid fa-file-lines nav-icon"></i><span class="nav-label"> Meeting Minutes</span>
+            </a>
         <?php endif; ?>
         <a href="notifications.php" class="<?php echo $current_page == 'notifications.php' ? 'active' : ''; ?>">
             <i class="fa-solid fa-bell nav-icon"></i><span class="nav-label"> Notifications</span>

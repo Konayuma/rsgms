@@ -93,7 +93,7 @@ function createTablesMysql($pdo) {
         disbursement_date DATE,
         repayment_period INT,
         repayment_frequency VARCHAR(20) DEFAULT 'monthly',
-        status ENUM('pending', 'approved', 'disbursed', 'repaid', 'defaulted') DEFAULT 'pending',
+        status ENUM('pending', 'approved', 'rejected', 'disbursed', 'repaid', 'defaulted') DEFAULT 'pending',
         approved_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (member_id) REFERENCES users(id),
@@ -268,7 +268,7 @@ function createTablesPgsql($pdo) {
         repayment_period INT,
         repayment_frequency VARCHAR(20) DEFAULT 'monthly',
         status VARCHAR(20) NOT NULL DEFAULT 'pending'
-            CHECK (status IN ('pending', 'approved', 'disbursed', 'repaid', 'defaulted')),
+            CHECK (status IN ('pending', 'approved', 'rejected', 'disbursed', 'repaid', 'defaulted')),
         approved_by INT REFERENCES users(id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");

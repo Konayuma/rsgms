@@ -471,12 +471,17 @@ if ($role == 'admin') {
                             <td><?php echo ucfirst($meeting['meeting_type'] ?? 'Regular'); ?></td>
                             <td><?php echo $meeting['attendance_count'] ?? '-'; ?></td>
                             <td>
-                                <button onclick="viewMinutes('<?php echo htmlspecialchars(str_replace(["\r\n", "\r", "\n"], '\\n', addslashes($meeting['minutes'] ?? 'No minutes recorded'))); ?>')" style="padding: 5px 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">View Minutes</button>
+                                <button class="btn-minutes" onclick="viewMinutes(<?php echo $meeting['id']; ?>)">View Minutes</button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+            </div>
+            <div style="margin-top: 16px; text-align: right;">
+                <a href="meeting_minutes.php" style="color: var(--clay); text-decoration: none; font-size: 0.88rem;">
+                    View All Minutes <i class="fa-solid fa-arrow-right"></i>
+                </a>
             </div>
         </div>
         <?php endif; ?>
@@ -626,9 +631,28 @@ if ($role == 'admin') {
         <?php endif; ?>
     </div>
 <script>
-function viewMinutes(minutes) {
-    alert('Meeting Minutes:\n\n' + minutes);
+const recentMeetings = <?php echo isset($recent_meetings) ? json_encode($recent_meetings) : '[]'; ?>;
+
+function viewMinutes(meetingId) {
+    const meeting = recentMeetings.find(m => m.id == meetingId);
+    if (!meeting) return;
+    const content = document.getElementById('minutesContent');
+    content.textContent = meeting.minutes && meeting.minutes.trim()
+        ? meeting.minutes
+        : 'No minutes recorded for this meeting.';
+    document.getElementById('minutesModal').style.display = 'flex';
 }
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
+
 document.querySelectorAll('.copy-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var code = this.getAttribute('data-copy');
@@ -645,6 +669,18 @@ document.querySelectorAll('.copy-btn').forEach(function(btn) {
     });
 });
 </script>
+
+<!-- Minutes View Modal -->
+<div id="minutesModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-lines section-icon"></i> Meeting Minutes</h3>
+            <button class="modal-close" onclick="closeModal('minutesModal')">&times;</button>
+        </div>
+        <div id="minutesContent" style="white-space: pre-wrap; line-height: 1.7; font-size: 0.92rem; color: var(--ink); max-height: 60vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
     <script src="assets/js/loading.js"></script>
 </body>
 </html>

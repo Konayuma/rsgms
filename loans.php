@@ -28,19 +28,42 @@ $members = $stmt->fetchAll();
 // Handle loan actions (loan_officer only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'approve_loan' && $role == 'loan_officer') {
-        $loan_id = $_POST['loan_id'];
-        try {
-            $stmt = $pdo->prepare("UPDATE loans SET status = 'approved', approval_date = ? WHERE id = ?");
-            $stmt->execute([date('Y-m-d'), $loan_id]);
-            $stmt = $pdo->prepare("SELECT member_id FROM loans WHERE id = ?");
-            $stmt->execute([$loan_id]);
-            $loan_member = $stmt->fetchColumn();
-            if ($loan_member) {
-                notifyUser($loan_member, 'Loan Approved', 'Your loan application has been approved.');
+        $loan_id = intval($_POST['loan_id']);
+        $stmt = $pdo->prepare("SELECT status, member_id FROM loans WHERE id = ?");
+        $stmt->execute([$loan_id]);
+        $loan = $stmt->fetch();
+        if (!$loan) {
+            setFlash('error', 'Loan not found.');
+        } elseif ($loan['status'] !== 'pending') {
+            setFlash('error', 'Only pending loans can be approved.');
+        } else {
+            try {
+                $stmt = $pdo->prepare("UPDATE loans SET status = 'approved', approval_date = ?, approved_by = ? WHERE id = ?");
+                $stmt->execute([date('Y-m-d'), $user_id, $loan_id]);
+                notifyUser($loan['member_id'], 'Loan Approved', 'Your loan application has been approved.');
+                setFlash('success', 'Loan approved successfully!', ['celebrate' => true]);
+            } catch (PDOException $e) {
+                setFlash('error', "Error approving loan: " . $e->getMessage());
             }
-            setFlash('success', 'Loan approved successfully!', ['celebrate' => true]);
-        } catch (PDOException $e) {
-            setFlash('error', "Error approving loan: " . $e->getMessage());
+        }
+    } elseif ($_POST['action'] === 'reject_loan' && $role == 'loan_officer') {
+        $loan_id = intval($_POST['loan_id']);
+        $stmt = $pdo->prepare("SELECT status, member_id FROM loans WHERE id = ?");
+        $stmt->execute([$loan_id]);
+        $loan = $stmt->fetch();
+        if (!$loan) {
+            setFlash('error', 'Loan not found.');
+        } elseif ($loan['status'] !== 'pending') {
+            setFlash('error', 'Only pending loans can be rejected.');
+        } else {
+            try {
+                $stmt = $pdo->prepare("UPDATE loans SET status = 'rejected' WHERE id = ?");
+                $stmt->execute([$loan_id]);
+                notifyUser($loan['member_id'], 'Loan Rejected', 'Your loan application has been rejected.');
+                setFlash('success', 'Loan rejected successfully.');
+            } catch (PDOException $e) {
+                setFlash('error', "Error rejecting loan: " . $e->getMessage());
+            }
         }
     } elseif ($_POST['action'] === 'disburse_loan' && $role == 'loan_officer') {
         $loan_id = $_POST['loan_id'];
@@ -193,6 +216,17 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
             background: #3498db;
         }
         
+        .btn-reject {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
         .btn-disburse {
             background: #e67e22;
         }
@@ -221,6 +255,11 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
         .badge-repaid {
             background: #28a745;
             color: white;
+        }
+        
+        .badge-rejected {
+            background: #f8d7da;
+            color: #721c24;
         }
         .btn-submit-repay { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-submit-repay:hover { background: #219a52; }
@@ -270,9 +309,9 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
                                     <button type="submit" class="btn-approve" style="padding: 5px 10px;">Approve</button>
                                 </form>
                                 <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="action" value="disburse_loan">
+                                    <input type="hidden" name="action" value="reject_loan">
                                     <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
-                                    <button type="submit" class="btn-disburse" style="padding: 5px 10px;">Disburse</button>
+                                    <button type="submit" class="btn-reject" style="padding: 5px 10px;" onclick="return confirm('Reject this loan application?')">Reject</button>
                                 </form>
                                 <?php endif; ?>
                             </td>
@@ -315,6 +354,7 @@ if (in_array($role, ['admin', 'group_admin', 'loan_officer'])) {
                                     switch($loan['status']) {
                                         case 'pending': $badgeClass = 'badge-pending'; break;
                                         case 'approved': $badgeClass = 'badge-approved'; break;
+                                        case 'rejected': $badgeClass = 'badge-rejected'; break;
                                         case 'disbursed': $badgeClass = 'badge-disbursed'; break;
                                         case 'repaid': $badgeClass = 'badge-repaid'; break;
                                     }
