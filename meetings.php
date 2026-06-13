@@ -2,8 +2,15 @@
 $user_id = $user['id'];
 $role = $user['role'];
 $group_id = $user['group_id'];
+$groups = [];
+$selected_group_id = intval($_POST['group_id'] ?? $group_id);
 $message = '';
 $error = '';
+
+if ($role === 'admin') {
+    $stmt = $pdo->query("SELECT id, group_name FROM savings_groups ORDER BY group_name");
+    $groups = $stmt->fetchAll();
+}
 
 // Handle meeting recording
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
@@ -15,13 +22,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $loans_disbursed = floatval($_POST['loans_disbursed']);
         $loans_repaid = floatval($_POST['loans_repaid']);
         $minutes = trim($_POST['minutes']);
+        $record_group_id = $role === 'admin' ? intval($_POST['group_id'] ?? 0) : intval($group_id);
         
-        try {
-            $stmt = $pdo->prepare("INSERT INTO meetings (group_id, meeting_date, meeting_type, attendance_count, savings_collected, loans_disbursed, loans_repaid, minutes, recorded_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$group_id, $meeting_date, $meeting_type, $attendance_count, $savings_collected, $loans_disbursed, $loans_repaid, $minutes, $user_id]);
-            $message = "Meeting recorded successfully!";
-        } catch (PDOException $e) {
-            $error = "Error recording meeting: " . $e->getMessage();
+        if ($record_group_id <= 0) {
+            $error = $role === 'admin'
+                ? 'Please select a valid group for this meeting.'
+                : 'Your account is not assigned to a valid group.';
+        } else {
+            $stmt = $pdo->prepare("SELECT id FROM savings_groups WHERE id = ?");
+            $stmt->execute([$record_group_id]);
+
+            if (!$stmt->fetch()) {
+                $error = 'Selected group does not exist.';
+            } else {
+                try {
+                    $stmt = $pdo->prepare("INSERT INTO meetings (group_id, meeting_date, meeting_type, attendance_count, savings_collected, loans_disbursed, loans_repaid, minutes, recorded_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$record_group_id, $meeting_date, $meeting_type, $attendance_count, $savings_collected, $loans_disbursed, $loans_repaid, $minutes, $user_id]);
+                    $message = "Meeting recorded successfully!";
+                    if ($role === 'admin') {
+                        $selected_group_id = $record_group_id;
+                    }
+                } catch (PDOException $e) {
+                    $error = "Error recording meeting: " . $e->getMessage();
+                }
+            }
         }
     }
 }
@@ -141,6 +165,19 @@ if ($group_id) {
                         </select>
                     </div>
                 </div>
+                <?php if ($role === 'admin'): ?>
+                <div class="form-group">
+                    <label>Group *</label>
+                    <select name="group_id" required>
+                        <option value="">Select Group</option>
+                        <?php foreach ($groups as $group): ?>
+                        <option value="<?php echo $group['id']; ?>" <?php echo ($selected_group_id == $group['id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($group['group_name']); ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Attendance Count</label>
